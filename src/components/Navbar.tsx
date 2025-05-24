@@ -1,6 +1,7 @@
 import React from 'react'
 import { AddFunctionDrawer } from './AddFunctionDrawer'
-// import { HeaderDrawer } from './HeaderDrawer'
+import { HeaderDrawer } from './HeaderDrawer'
+import { ShareButton } from './ShareButton'
 
 export const Navbar = () => {
     return (
@@ -9,7 +10,8 @@ export const Navbar = () => {
                 Twig HTML Editor
             </h1>
             <div className='pr-4 flex items-center gap-3'>
-                {/* <HeaderDrawer /> */}
+                <ShareButton />
+                <HeaderDrawer />
                 <AddFunctionDrawer />
             </div>
         </div>

@@ -1,9 +1,17 @@
 import { normalizeTwigTemplate } from "@/lib/utils";
 import { useStore } from "@/store/store";
+import { toast } from "sonner";
 import Twig from "twig";
 
 export const useTwigService = () => {
-    const { html, json, renderedHtml, setRenderedHtml, htmlHead } = useStore();
+    const {
+        twigExtension,
+        html,
+        json,
+        renderedHtml,
+        setRenderedHtml,
+        htmlHead
+    } = useStore();
 
     const buildHtmlHead = () => {
         let headContent = "";
@@ -63,6 +71,13 @@ export const useTwigService = () => {
 
                 return date.toISOString().split("T")[0]; // Default to YYYY-MM-DD
             });
+
+            try {
+                eval(twigExtension)(Twig);
+            } catch (error) {
+                console.error(error);
+            }
+
             // Add other commonly used functions
             Twig.extendFunction("range", function (start, end, step = 1) {
                 const result = [];
@@ -104,6 +119,7 @@ ${renderedBodyHtml}
         } catch (error) {
             console.error(error);
             setRenderedHtml(`${JSON.stringify(error)}`);
+            toast.error("Error rendering HTML");
         }
     };
 

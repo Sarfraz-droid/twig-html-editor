@@ -22,6 +22,17 @@ A powerful HTML editor with Twig templating support and configurable HTML head e
 - Add custom head content (CSS, scripts, meta tags)
 - Real-time preview integration
 
+### 🔗 **URL State Management**
+- **NEW**: Save and share application state via compressed URLs
+- **Advanced Compression**: Uses LZ-string compression to dramatically reduce URL size
+- **Hash Fragments**: Uses URL hash (#) instead of query parameters to avoid server limits
+- **Smart Optimization**: Only stores differences from default values
+- Automatic URL updates as you edit (debounced)
+- One-click sharing with clipboard integration
+- Restore complete state from shared URLs
+- Includes HTML content, JSON data, and head elements
+- **100% URL-based**: No localStorage dependency - truly portable sharing
+
 ### ⚡ **Advanced Features**
 - Custom function editor with JavaScript support
 - JSON data editor for template variables
@@ -51,7 +62,37 @@ yarn dev
 2. **Configure Head Elements**: Click the "📄 HTML Head" button to open the header drawer
 3. **Add JSON Data**: Provide template variables in the JSON editor
 4. **Create Functions**: Use the "+ Function" button to add custom JavaScript functions
-5. **Preview**: View the rendered result in the live preview panel
+5. **Share Your Work**: Click the "Share" button to copy a shareable URL
+6. **Preview**: View the rendered result in the live preview panel
+
+## Sharing & URL State
+
+### 🔗 **Share Button**
+- Click the "Share" button in the navbar to generate a shareable URL
+- **Compressed URLs**: Uses advanced LZ-string compression for minimal URL size
+- **No Server Issues**: Uses URL hash fragments that don't get sent to servers
+- **Truly Portable**: Everything is in the URL - works across browsers and devices
+- Share the URL with others to restore the exact same content and settings
+
+### 🔄 **Auto-Save to URL**
+- Your work is automatically saved as you type (with 1-second debouncing)
+- **Hash-based Storage**: State stored in URL hash fragment (after #)
+- **Optimized Encoding**: Only saves differences from defaults to minimize size
+- Bookmark or share the URL at any time to preserve your current state
+- Refresh the page and your work will be automatically restored
+
+### 📋 **Technical Features**
+- **LZ-String Compression**: Advanced compression algorithm reduces URL size by 60-80%
+- **Smart Defaults**: Only encodes values that differ from defaults
+- **Hash Fragments**: Uses `#state=...` to avoid server processing
+- **URL Safe**: All encoding is URL-safe and shareable
+- **No 431 Errors**: Hash fragments bypass server header size limits
+
+### 📋 **State Includes**
+- HTML template content
+- JSON data variables
+- All HTML head elements (title, meta tags, custom content)
+- Everything needed to reproduce your exact setup
 
 ## HTML Head Features
 
@@ -95,4 +136,4 @@ The header drawer allows you to configure:
 
 ## Development
 
-Built with React + TypeScript + Vite template with additional customizations for Twig templating and HTML head management.
+Built with React + TypeScript + Vite template with additional customizations for Twig templating, HTML head management, and URL state persistence.

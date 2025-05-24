@@ -9,6 +9,7 @@ export interface HtmlHeadElements {
 }
 
 type Store = {
+    twigExtension: string;
     html: string;
     json: string;
     renderedHtml: string;
@@ -17,9 +18,11 @@ type Store = {
     setJson: (json: string) => void;
     setRenderedHtml: (renderedHtml: string) => void;
     setHtmlHead: (htmlHead: Partial<HtmlHeadElements>) => void;
+    setTwigExtension: (twigExtension: string) => void;
 };
 
 export const useStore = create<Store>((set) => ({
+    twigExtension: `(Twig) => {}`,
     html: `<header>
     <h1>Welcome to {{name}}</h1>
     <p>Today is: {{now() | dateFormat}}</p>
@@ -51,6 +54,7 @@ export const useStore = create<Store>((set) => ({
     setHtmlHead: (htmlHead: Partial<HtmlHeadElements>) =>
         set((state) => ({
             htmlHead: { ...state.htmlHead, ...htmlHead }
-        }))
+        })),
+    setTwigExtension: (twigExtension: string) => set({ twigExtension })
 }));
 
