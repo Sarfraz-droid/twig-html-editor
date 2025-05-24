@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from 'react'
-import Editor from '@monaco-editor/react';
+// import Editor from '@monaco-editor/react';
 import { cn } from '@/lib/utils';
 import { motion } from "motion/react"
 import { editor } from 'monaco-editor';
+import { useResizeObserver } from '@mantine/hooks';
 
 type MonacoEditorComponentProps = {
   language: string;
   title: string;
   value: string;
-  height: string;
   onChange: (value: string | undefined) => void;
   onTopBarClick: () => void;
   className?: {
@@ -20,32 +20,55 @@ type MonacoEditorComponentProps = {
   isOpen: boolean;
 }
 
-export const MonacoEditorComponent = ({ language, title, value, height, onTopBarClick, onChange, className, isOpen }: MonacoEditorComponentProps) => {
-  // const editorContainerRef = useRef<HTMLDivElement>(null);
-  // const editorRef = useRef<editor.IEditor>(null);
+export const MonacoEditorComponent = ({ language, title, value, onTopBarClick, onChange, className, isOpen }: MonacoEditorComponentProps) => {
+  const [editorContainerRef] = useResizeObserver();
+  const editorRef = useRef<editor.IEditor>(null);
 
-  // useEffect(() => {
-  //   if (editorContainerRef.current) {
-  //     editorRef.current = editor.create(editorContainerRef.current, {
-  //       language,
-  //       value,
-  //       theme: 'vs-dark',
-  //       minimap: {
-  //         enabled: false
-  //       }
-  //     })
-  //   }
-  // }, [])
+  useEffect(() => {
+    if (editorContainerRef.current) {
+      editorContainerRef.current.innerHTML = "";
+      editorRef.current = editor.create(editorContainerRef.current, {
+        language,
+        value,
+        theme: 'vs-dark',
+        minimap: {
+          enabled: false
+        }
+      })
+    }
 
-  // useEffect(() => {
-  //   if (editorContainerRef.current) {
-  //     editorContainerRef.current.style.height = height;
-  //     editorRef.current?.layout();
-  //   }
-  // }, [])
+    return () => {
+      if (editorRef.current) {
+        editorRef.current.dispose();
+      }
+    }
+
+  }, [])
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.layout({
+        height: editorContainerRef.current?.getBoundingClientRect().height,
+        width: editorContainerRef.current?.getBoundingClientRect().width
+      });
+    }
+  }, [editorContainerRef, editorRef])
+
+  useEffect(() => {
+    if (editorRef.current) {
+      const model = editorRef.current.getModel() as editor.ITextModel;
+      if (model) {
+        
+        model.onDidChangeContent(() => {
+          onChange(model.getValue());
+        });
+      }
+    }
+  }, [onChange])
+
 
   return (
-    <motion.div className={cn("bg-[#1e1e1e] rounded-lg", className?.container)}>
+    <motion.div className={cn("bg-[#1e1e1e] rounded-lg h-full overflow-hidden flex flex-col", className?.container)}>
       <div className={cn("font-semibold text-base p-2 flex items-center justify-between", className?.title)}
         onClick={onTopBarClick}
       >
@@ -53,25 +76,11 @@ export const MonacoEditorComponent = ({ language, title, value, height, onTopBar
           {title}
         </div>
       </div>
-      <motion.div
-        animate={{
-          height: isOpen ? height : 0
-        }}
-        className='overflow-hidden'
+      <div
+        className='flex-1'
+        ref={editorContainerRef}
       >
-        <Editor
-          language={language}
-          value={value}
-          theme='vs-dark'
-          options={{
-            minimap: {
-              enabled: false
-            }
-          }}
-          onChange={onChange}
-
-        />
-      </motion.div>
+      </div>
     </motion.div>
   )
 }

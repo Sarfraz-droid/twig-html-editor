@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { MonacoEditorComponent } from './MonacoEditorComponent'
 import { HTMLPreview } from './HTMLPreview'
 import { useElementSize } from '@mantine/hooks';
-import { editorContents, useEditorElementSize } from '@/hook/useEditorElementSize';
-import { useTwigService } from '@/hook/useTwigService';
 import { useStore } from '@/store/store';
 
 
@@ -42,7 +40,6 @@ export const EditorContainer = () => {
                         title={'HTML'}
                         value={html}
                         onChange={(value) => handleEditorChange('html', value)}
-                        height={`calc(40vh - 16px)`}
                         onTopBarClick={() => { }}
                         isOpen={true}
                     />}
@@ -56,7 +53,6 @@ export const EditorContainer = () => {
                         title={'JSON'}
                         value={json}
                         onChange={(value) => handleEditorChange('json', value)}
-                        height={`calc(40vh - 16px)`}
                         onTopBarClick={() => { }}
                         isOpen={true}
                     />}
