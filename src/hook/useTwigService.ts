@@ -44,6 +44,40 @@ export const useTwigService = () => {
         return headContent;
     };
 
+    // Function to make all links open in new tabs
+    const processLinksForNewTab = (htmlContent: string): string => {
+        try {
+            // Create a temporary DOM parser
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, "text/html");
+
+            // Find all anchor tags
+            const links = doc.querySelectorAll("a[href]");
+
+            // Add target="_blank" and security attributes to all links
+            links.forEach((link) => {
+                link.setAttribute("target", "_blank");
+                link.setAttribute("rel", "noopener noreferrer");
+            });
+
+            // Return the processed HTML
+            return doc.body.innerHTML;
+        } catch (error) {
+            console.warn("Error processing links for new tab:", error);
+            // Fallback: use regex replacement if DOM parsing fails
+            return htmlContent.replace(
+                /<a\s+([^>]*href\s*=\s*["|'][^"|']+["|'][^>]*)>/gi,
+                (match, attributes) => {
+                    // Only add target if it's not already present
+                    if (!attributes.includes("target=")) {
+                        return `<a ${attributes} target="_blank" rel="noopener noreferrer">`;
+                    }
+                    return match;
+                }
+            );
+        }
+    };
+
     const renderHtml = () => {
         try {
             Twig.extendFunction("now", function () {
@@ -104,6 +138,9 @@ export const useTwigService = () => {
 
             console.log(renderedBodyHtml);
 
+            // Process the body HTML to make links open in new tabs
+            const processedBodyHtml = processLinksForNewTab(renderedBodyHtml);
+
             // Build complete HTML document with head elements
             const headContent = buildHtmlHead();
             const completeHtml = `<!DOCTYPE html>
@@ -111,7 +148,7 @@ export const useTwigService = () => {
 <head>
 ${headContent}</head>
 <body>
-${renderedBodyHtml}
+${processedBodyHtml}
 </body>
 </html>`;
 

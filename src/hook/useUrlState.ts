@@ -26,8 +26,6 @@ export const useUrlState = () => {
     const optimizeState = useCallback((state: UrlState): Partial<UrlState> => {
         const optimized: Partial<UrlState> = {};
 
-        console.log(state, optimized);
-
         // Only include HTML if it's different from default
         const defaultHtml = `<header>
     <h1>Welcome to {{name}}</h1>
@@ -43,8 +41,6 @@ export const useUrlState = () => {
 <footer>
     <p>&copy; {{now() | year}} - Built with Twig HTML Editor</p>
 </footer>`;
-
-        console.log(state.html, defaultHtml);
 
         if (state.html !== defaultHtml) {
             optimized.html = state.html;
@@ -156,8 +152,6 @@ export const useUrlState = () => {
                 // First optimize the state to remove defaults
                 const optimizedState = optimizeState(state);
 
-                console.log(optimizedState);
-
                 // Only compress if there's actual data to encode
                 if (Object.keys(optimizedState).length === 0) {
                     return ""; // Empty state means default values
@@ -232,8 +226,6 @@ export const useUrlState = () => {
             if (hash.startsWith("#state=")) {
                 const encodedState = hash.substring(7); // Remove '#state='
                 const decodedState = decodeState(encodedState);
-
-                console.log("decodedState", decodedState);
 
                 if (decodedState) {
                     setHtml(decodedState.html);

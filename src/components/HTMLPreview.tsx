@@ -22,7 +22,6 @@ export const HTMLPreview = ({ className }: HTMLPreviewProps) => {
         }
     };
 
-
     return (
         <div className={cn("bg-[#1e1e1e] rounded-lg h-full flex flex-col", className?.container)}>
             <div className={cn("font-semibold text-base p-2 flex items-center justify-between border-b border-gray-600", className?.title)}>
@@ -63,7 +62,7 @@ export const HTMLPreview = ({ className }: HTMLPreviewProps) => {
                     className={cn("w-full h-full border-0 rounded-md bg-white", className?.iframe)}
                     srcDoc={renderedHtml}
                     title="HTML Preview"
-                    sandbox="allow-scripts allow-same-origin"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
                 />
             </div>
         </div>

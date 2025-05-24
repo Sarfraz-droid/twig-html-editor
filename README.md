@@ -8,6 +8,7 @@ A powerful HTML editor with Twig templating support and configurable HTML head e
 - Real-time HTML editing with Monaco Editor
 - Syntax highlighting and error detection
 - Live preview with automatic rendering
+- **Auto New-Tab Links**: All links in preview automatically open in new tabs for safety
 
 ### 🧩 **Twig Templating**
 - Full Twig template engine support
@@ -39,6 +40,7 @@ A powerful HTML editor with Twig templating support and configurable HTML head e
 - Popup preview window
 - Auto-refresh functionality
 - Dark theme interface
+- **Secure Link Handling**: Links automatically get `target="_blank"` and `rel="noopener noreferrer"`
 
 ## Getting Started
 

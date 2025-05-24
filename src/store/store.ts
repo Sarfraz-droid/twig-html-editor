@@ -22,7 +22,7 @@ type Store = {
 };
 
 export const useStore = create<Store>((set) => ({
-    twigExtension: `(Twig) => {}`,
+    twigExtension: "(Twig) => {}",
     html: `<header>
     <h1>Welcome to {{name}}</h1>
     <p>Today is: {{now() | dateFormat}}</p>
@@ -32,6 +32,7 @@ export const useStore = create<Store>((set) => ({
         <h2>About {{name}}</h2>
         <p>This page demonstrates the HTML head integration with Twig templating.</p>
         <p>The page title, meta description, and other head elements are now configurable!</p>
+        <p><a href="https://example.com">This link will open in a new tab</a></p>
     </div>
 </main>
 <footer>
