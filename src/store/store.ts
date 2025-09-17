@@ -9,6 +9,7 @@ export interface HtmlHeadElements {
 }
 
 type Store = {
+    activeTab: "code" | "serializer";
     twigExtension: string;
     html: string;
     json: string;
@@ -19,9 +20,11 @@ type Store = {
     setRenderedHtml: (renderedHtml: string) => void;
     setHtmlHead: (htmlHead: Partial<HtmlHeadElements>) => void;
     setTwigExtension: (twigExtension: string) => void;
+    setActiveTab: (tab: "code" | "serializer") => void;
 };
 
 export const useStore = create<Store>((set) => ({
+    activeTab: "code",
     twigExtension: "(Twig) => {}",
     html: `<header>
     <h1>Welcome to {{name}}</h1>
@@ -56,6 +59,7 @@ export const useStore = create<Store>((set) => ({
         set((state) => ({
             htmlHead: { ...state.htmlHead, ...htmlHead }
         })),
-    setTwigExtension: (twigExtension: string) => set({ twigExtension })
+    setTwigExtension: (twigExtension: string) => set({ twigExtension }),
+    setActiveTab: (tab: "code" | "serializer") => set({ activeTab: tab })
 }));
 

@@ -1,17 +1,22 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MonacoEditorComponent } from './MonacoEditorComponent'
 import { HTMLPreview } from './HTMLPreview'
 import { useElementSize } from '@mantine/hooks';
 import { useStore } from '@/store/store';
 import { useUrlState } from '@/hook/useUrlState';
+import { useTwigService } from '@/hook/useTwigService';
+import clsx from 'clsx';
+import { motion } from 'motion/react'
 
+type LeftTabState = 'html' | 'json'
 
 export const EditorContainer = () => {
     const { ref, height } = useElementSize();
     const { html, json, htmlHead, setHtml, setJson } = useStore();
     const { updateUrlWithState } = useUrlState();
     const debounceTimer = useRef<number | undefined>(undefined);
-
+    const { renderHtml } = useTwigService();
+    const [leftTabState, setLeftTabState] = useState<LeftTabState>('html');
     const handleEditorChange = (editorId: string, value: string | undefined) => {
         console.log(editorId, value);
         if (editorId === 'html') {
@@ -51,32 +56,42 @@ export const EditorContainer = () => {
             {/* Editor Section */}
             <div className='w-1/2 flex flex-col gap-2 h-full'>
 
-                <div
-                    className="flex-1 rounded-lg overflow-hidden"
+                <motion.div
+                    layout
+                    transition={{ duration: 0.25, ease: [0.2, 0.65, 0.3, 0.9] }}
+                    className={clsx("rounded-lg overflow-hidden", {
+                        "flex-1": leftTabState === 'html'
+                    })}
                 >
                     {height > 0 && <MonacoEditorComponent
                         language={'html'}
                         title={'HTML'}
                         value={html}
                         onChange={(value) => handleEditorChange('html', value)}
-                        onTopBarClick={() => { }}
-                        isOpen={true}
+                        onTopBarClick={() => setLeftTabState((v) => v === 'html' ? 'json' : 'html')}
+                        onRun={renderHtml}
+                        isOpen={leftTabState === 'html'}
                     />}
 
-                </div>
-                <div
-                    className="flex-1 rounded-lg overflow-hidden"
+                </motion.div>
+                <motion.div
+                    layout
+                    transition={{ duration: 0.25, ease: [0.2, 0.65, 0.3, 0.9] }}
+                    className={clsx("rounded-lg overflow-hidden", {
+                        "flex-1": leftTabState === 'json'
+                    })}
                 >
                     {height > 0 && <MonacoEditorComponent
                         language={'json'}
                         title={'JSON'}
                         value={json}
                         onChange={(value) => handleEditorChange('json', value)}
-                        onTopBarClick={() => { }}
-                        isOpen={true}
+                        onTopBarClick={() => setLeftTabState((v) => v === 'json' ? 'html' : 'json')}
+                        onRun={renderHtml}
+                        isOpen={leftTabState === 'json'}
                     />}
 
-                </div>
+                </motion.div>
 
 
             </div>
