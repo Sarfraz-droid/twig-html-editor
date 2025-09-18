@@ -5,6 +5,7 @@ import { editor, KeyCode, KeyMod } from "monaco-editor";
 import { useResizeObserver } from "@mantine/hooks";
 import { useEffect, useRef } from "react";
 import clsx from "clsx";
+import { useDebouncedCallback } from "@mantine/hooks";
 
 type MonacoEditorComponentProps = {
     language: string;
@@ -37,6 +38,8 @@ export const MonacoEditorComponent = ({
     const [editorContainerRef] = useResizeObserver();
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
+    const debouncedOnChange = useDebouncedCallback(onChange, 1000);
+
     useEffect(() => {
         if (editorContainerRef.current) {
             editorContainerRef.current.innerHTML = "";
@@ -48,14 +51,7 @@ export const MonacoEditorComponent = ({
                     enabled: false
                 }
             });
-            if (onRun && editorRef.current) {
-                editorRef.current.addCommand(
-                    KeyMod.CtrlCmd | KeyCode.Enter,
-                    () => {
-                        onRun();
-                    }
-                );
-            }
+
         }
 
         return () => {
@@ -63,7 +59,7 @@ export const MonacoEditorComponent = ({
                 editorRef.current.dispose();
             }
         };
-    }, [editorContainerRef, language, onRun, value]);
+    }, []);
 
     // Keep Monaco sized during container transitions
     useEffect(() => {
@@ -84,11 +80,12 @@ export const MonacoEditorComponent = ({
             const model = editorRef.current.getModel() as editor.ITextModel;
             if (model) {
                 model.onDidChangeContent(() => {
-                    onChange(model.getValue());
+                    console.log("onDidChangeContent", model.getValue());
+                    debouncedOnChange(model.getValue());
                 });
             }
         }
-    }, [onChange]);
+    }, []);
 
     useEffect(() => {
         if (!editorRef.current) return;

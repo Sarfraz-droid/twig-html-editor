@@ -30,6 +30,7 @@
         "tailwind-merge": "^3.3.0",
         "tailwindcss": "^4.1.7",
         "twig": "^1.17.1",
+        "usehooks-ts": "^3.1.1",
         "vaul": "^1.1.2",
         "zustand": "^5.0.5"
     },

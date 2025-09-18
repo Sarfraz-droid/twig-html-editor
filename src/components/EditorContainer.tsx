@@ -18,13 +18,19 @@ export const EditorContainer = () => {
     const { renderHtml } = useTwigService();
     const [leftTabState, setLeftTabState] = useState<LeftTabState>('html');
     const handleEditorChange = (editorId: string, value: string | undefined) => {
-        console.log(editorId, value);
+        console.log({editorId, value});
         if (editorId === 'html') {
+            console.log("setHtml", value);
             setHtml(value || '');
         } else if (editorId === 'json') {
+            console.log("setJson", value);
             setJson(value || '');
         }
     };
+
+    const renderHtmlHandler = () => {
+        renderHtml();
+    }
 
     // Debounced URL update when state changes
     useEffect(() => {
@@ -69,7 +75,7 @@ export const EditorContainer = () => {
                         value={html}
                         onChange={(value) => handleEditorChange('html', value)}
                         onTopBarClick={() => setLeftTabState((v) => v === 'html' ? 'json' : 'html')}
-                        onRun={renderHtml}
+                        onRun={renderHtmlHandler}
                         isOpen={leftTabState === 'html'}
                     />}
 
@@ -87,7 +93,7 @@ export const EditorContainer = () => {
                         value={json}
                         onChange={(value) => handleEditorChange('json', value)}
                         onTopBarClick={() => setLeftTabState((v) => v === 'json' ? 'html' : 'json')}
-                        onRun={renderHtml}
+                        onRun={renderHtmlHandler}
                         isOpen={leftTabState === 'json'}
                     />}
 

@@ -296,6 +296,8 @@ export const useTwigService = () => {
 
     const renderHtml = () => {
         try {
+
+            console.log("renderHtml", { html, json });
             // Register built-in helpers on each run (idempotent)
             Twig.extendFunction("now", function () {
                 return new Date().toISOString();
