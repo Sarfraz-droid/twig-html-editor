@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Drawer,
     DrawerContent,
@@ -10,6 +9,7 @@ import {
 import { Button } from "./ui/button";
 import { useStore } from "@/store/store";
 import { MonacoEditorComponent } from "./MonacoEditorComponent";
+import { FunctionSquare } from "lucide-react";
 
 
 export const AddFunctionDrawer = () => {
@@ -17,12 +17,15 @@ export const AddFunctionDrawer = () => {
 
     return (
         <Drawer shouldScaleBackground={true}>
-            <DrawerTrigger>
-                <Button variant={"outline"}>Twig Extension</Button>
+            <DrawerTrigger asChild>
+                <Button variant="outline" size="sm" title="Edit Twig extension">
+                    <FunctionSquare className="size-4" />
+                    <span className="hidden lg:inline">Extension</span>
+                </Button>
             </DrawerTrigger>
-            <DrawerContent className="h-[100vh] min-h-[600px]">
+            <DrawerContent className="h-[92dvh]">
                 <DrawerHeader>
-                    <DrawerTitle>Add Function</DrawerTitle>
+                    <DrawerTitle>Edit Twig Extension</DrawerTitle>
                 </DrawerHeader>
                 <DrawerDescription className="px-4 h-full pb-4 flex flex-col">
                     <MonacoEditorComponent

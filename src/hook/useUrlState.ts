@@ -241,7 +241,7 @@ export const useUrlState = () => {
             console.error("Error loading state from URL:", error);
             return false;
         }
-    }, [decodeState, setHtml, setJson, setHtmlHead]);
+    }, [decodeState, setHtml, setJson, setHtmlHead, setTwigExtension]);
 
     // Copy shareable URL to clipboard
     const copyShareableUrl = useCallback(async (): Promise<boolean> => {

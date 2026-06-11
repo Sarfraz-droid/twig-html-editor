@@ -8,6 +8,17 @@ export interface HtmlHeadElements {
     customHead: string;
 }
 
+export type RenderStatus = "idle" | "rendering" | "success" | "warning" | "error";
+export type ConsoleSeverity = "info" | "warning" | "error";
+
+export interface ConsoleEntry {
+    id: string;
+    severity: ConsoleSeverity;
+    message: string;
+    details?: string;
+    timestamp: number;
+}
+
 type Store = {
     activeTab: "code" | "serializer";
     twigExtension: string;
@@ -15,12 +26,19 @@ type Store = {
     json: string;
     renderedHtml: string;
     htmlHead: HtmlHeadElements;
+    renderStatus: RenderStatus;
+    consoleEntries: ConsoleEntry[];
+    isConsoleOpen: boolean;
     setHtml: (html: string) => void;
     setJson: (json: string) => void;
     setRenderedHtml: (renderedHtml: string) => void;
     setHtmlHead: (htmlHead: Partial<HtmlHeadElements>) => void;
     setTwigExtension: (twigExtension: string) => void;
     setActiveTab: (tab: "code" | "serializer") => void;
+    setRenderStatus: (status: RenderStatus) => void;
+    addConsoleEntry: (entry: Omit<ConsoleEntry, "id" | "timestamp">) => void;
+    clearConsole: () => void;
+    setConsoleOpen: (isOpen: boolean) => void;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -52,6 +70,9 @@ export const useStore = create<Store>((set) => ({
         customHead:
             '<meta charset="UTF-8">\n<style>\n  body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }\n  .content { max-width: 800px; margin: 0 auto; }\n</style>'
     },
+    renderStatus: "idle",
+    consoleEntries: [],
+    isConsoleOpen: true,
     setHtml: (html: string) => set({ html }),
     setJson: (json: string) => set({ json }),
     setRenderedHtml: (renderedHtml: string) => set({ renderedHtml }),
@@ -60,6 +81,21 @@ export const useStore = create<Store>((set) => ({
             htmlHead: { ...state.htmlHead, ...htmlHead }
         })),
     setTwigExtension: (twigExtension: string) => set({ twigExtension }),
-    setActiveTab: (tab: "code" | "serializer") => set({ activeTab: tab })
+    setActiveTab: (tab: "code" | "serializer") => set({ activeTab: tab }),
+    setRenderStatus: (renderStatus: RenderStatus) => set({ renderStatus }),
+    addConsoleEntry: (entry) =>
+        set((state) => ({
+            consoleEntries: [
+                ...state.consoleEntries,
+                {
+                    ...entry,
+                    id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                    timestamp: Date.now()
+                }
+            ],
+            isConsoleOpen:
+                entry.severity === "error" ? true : state.isConsoleOpen
+        })),
+    clearConsole: () => set({ consoleEntries: [] }),
+    setConsoleOpen: (isConsoleOpen: boolean) => set({ isConsoleOpen })
 }));
-

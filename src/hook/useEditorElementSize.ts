@@ -1,5 +1,5 @@
 import { useElementSize } from '@mantine/hooks';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export const editorContents = [
     {
@@ -15,12 +15,11 @@ export const editorContents = [
 ]
 
 export const useEditorElementSize = () => {
-  const { ref, height, width } = useElementSize();
+  const { ref, height } = useElementSize();
   const editorContentRef = useRef<{
     [key: string]: HTMLDivElement
   }>({});
   const [resolvedEditorSize, setResolvedEditorSize] = useState<number>(0);
-  const [editorSectionSize, setEditorSectionSize] = useState<number>(0);
   const [activeEditor, setActiveEditor] = useState<string | null>('')
 
   const updateResolvedEditorSize = useCallback((size: number) => {
@@ -29,9 +28,8 @@ export const useEditorElementSize = () => {
     const resolvedHeight = height - (size * (editorContentSize + 1)) - (4 * (editorContentSize - 1));
 
 
-    setEditorSectionSize(size);
     setResolvedEditorSize(resolvedHeight);
-  }, [editorContentRef, height])
+  }, [height])
 
   
   useEffect(() => {

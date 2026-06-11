@@ -20,7 +20,7 @@ export const Serializer = () => {
     const handleRun = () => {
         try {
             if (mode === 'serialize') {
-                setOutput(serialize(input, false))
+                setOutput(serialize(input))
             } else {
                 setOutput(deserialize(input))
             }
@@ -163,7 +163,7 @@ export const Serializer = () => {
             if (mode === 'serialize') {
                 const readable = deserialize(output)
                 const pretty = beautifyHtmlWithTwig(readable)
-                setOutput(serialize(pretty, false))
+                setOutput(serialize(pretty))
             } else {
                 const pretty = beautifyHtmlWithTwig(output)
                 setOutput(pretty)
@@ -174,8 +174,8 @@ export const Serializer = () => {
     }
 
     return (
-        <div className='flex p-5 gap-5 h-[90vh]'>
-            <div className='w-1/2 flex flex-col gap-2 h-full'>
+        <main className="grid min-h-0 flex-1 gap-4 overflow-auto px-3 pb-4 sm:px-4 lg:grid-cols-2 lg:px-5">
+            <section className="flex min-h-[420px] flex-col gap-2">
                 <div className='flex items-center justify-between'>
                     <div className='font-semibold text-base'>Input</div>
                     <div className='flex items-center gap-2'>
@@ -198,9 +198,9 @@ export const Serializer = () => {
                         {mode === 'serialize' ? 'Escapes HTML while preserving Twig blocks' : 'Restores readable HTML from escaped string'}
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div className='w-1/2 flex flex-col gap-2 h-full'>
+            <section className="flex min-h-[420px] flex-col gap-2">
                 <div className='flex items-center justify-between'>
                     <div className='font-semibold text-base'>Output</div>
                     <div className='flex items-center gap-2'>
@@ -222,9 +222,8 @@ export const Serializer = () => {
                     <div>Output: {stats.outSize.toLocaleString()} chars</div>
                     <div>Δ: {stats.delta >= 0 ? '+' : ''}{stats.delta.toLocaleString()} chars</div>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     )
 }
-
 

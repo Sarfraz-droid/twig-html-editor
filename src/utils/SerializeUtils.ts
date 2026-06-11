@@ -57,14 +57,7 @@ export function deserialize(htmlString: string): string {
 }
 
 // Utility to serialize: convert HTML into an escaped string for storage/transmission
-export function serialize(html: string, showStats: boolean = false): string {
-    const originalSize = html.length;
-
-    if (showStats) {
-        console.log(`📊 Serialization stats:`);
-        console.log(`   Original size: ${originalSize.toLocaleString()} chars`);
-    }
-
+export function serialize(html: string): string {
     // Preserve Twig blocks {% %}, {{ }}, and {# #} from serialization
     const twigBlocks: string[] = [];
     const twigPlaceholderPrefix = "___TWIG_BLOCK_";
@@ -123,18 +116,6 @@ export function serialize(html: string, showStats: boolean = false): string {
             return twigBlocks[parseInt(index)];
         }
     );
-
-    if (showStats) {
-        const minifiedSize = minifiedHtml.length;
-        const finalSize = finalResult.length;
-        console.log(
-            `   Minified size:   ${minifiedSize.toLocaleString()} chars`
-        );
-        console.log(`   Serialized size: ${finalSize.toLocaleString()} chars`);
-        console.log(
-            `   Protected ${twigBlocks.length} Twig blocks from escaping`
-        );
-    }
 
     return finalResult;
 }

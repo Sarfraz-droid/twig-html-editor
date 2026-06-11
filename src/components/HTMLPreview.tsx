@@ -1,6 +1,8 @@
-import React from 'react'
-import { cn } from '@/lib/utils'
-import { useTwigService } from '@/hook/useTwigService';
+import { ExternalLink, LoaderCircle, Play, TriangleAlert } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useTwigService } from "@/hook/useTwigService";
+import { useStore } from "@/store/store";
+import { Button } from "./ui/button";
 
 type HTMLPreviewProps = {
     htmlContent?: string;
@@ -13,55 +15,99 @@ type HTMLPreviewProps = {
 
 export const HTMLPreview = ({ className }: HTMLPreviewProps) => {
     const { renderedHtml, renderHtml } = useTwigService();
+    const { renderStatus, addConsoleEntry } = useStore();
 
     const openInPopup = () => {
         const popup = window.open('', 'htmlPreview', 'width=800,height=600,scrollbars=yes,resizable=yes');
         if (popup) {
             popup.document.write(renderedHtml);
             popup.document.close();
+        } else {
+            addConsoleEntry({
+                severity: "error",
+                message: "Preview popup was blocked",
+                details: "Allow popups for this page and try again."
+            });
         }
     };
 
     return (
-        <div className={cn("bg-[#1e1e1e] rounded-lg h-full flex flex-col", className?.container)}>
-            <div className={cn("font-semibold text-base p-2 flex items-center justify-between border-b border-gray-600", className?.title)}>
-                <div className='pl-2 poppins-medium text-white'>
-                    HTML Preview
+        <section className={cn("h-full overflow-hidden rounded-xl border border-white/10 bg-[#101521] shadow-2xl shadow-black/20 flex flex-col", className?.container)}>
+            <div className={cn("min-h-12 px-3 flex items-center justify-between gap-3 border-b border-white/10", className?.title)}>
+                <div className="flex min-w-0 items-center gap-2">
+                    <div className="font-semibold text-slate-100">
+                        Preview
+                    </div>
+                    <div
+                        className={cn(
+                            "flex items-center gap-1.5 rounded-full px-2 py-1 text-[11px] font-medium",
+                            renderStatus === "error" &&
+                                "bg-rose-500/15 text-rose-300",
+                            renderStatus === "warning" &&
+                                "bg-amber-500/15 text-amber-300",
+                            renderStatus === "success" &&
+                                "bg-emerald-500/15 text-emerald-300",
+                            (renderStatus === "idle" ||
+                                renderStatus === "rendering") &&
+                                "bg-slate-500/15 text-slate-400"
+                        )}
+                    >
+                        {renderStatus === "rendering" && (
+                            <LoaderCircle className="size-3 animate-spin" />
+                        )}
+                        {renderStatus === "error" && (
+                            <TriangleAlert className="size-3" />
+                        )}
+                        <span className="capitalize">{renderStatus}</span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button
-                        className="p-1 hover:bg-gray-700 rounded transition-colors flex gap-2"
-                        onClick={() => {
-                            renderHtml();
-                        }}
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 text-slate-300 hover:bg-white/5 hover:text-white"
+                        onClick={renderHtml}
+                        aria-label="Render preview"
                     >
-                        <span className='text-xs self-center'>
-                            Render
-                        </span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
-                        </svg>
-                    </button>
-                    <button
+                        <Play className="size-3.5 fill-current" />
+                        <span className="hidden sm:inline">Render</span>
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={openInPopup}
-                        className="p-1 hover:bg-gray-700 rounded transition-colors"
+                        disabled={!renderedHtml}
+                        className="size-8 text-slate-300 hover:bg-white/5 hover:text-white"
                         title="Open in popup"
+                        aria-label="Open preview in popup"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-white">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                        </svg>
-                    </button>
+                        <ExternalLink className="size-4" />
+                    </Button>
                 </div>
             </div>
-            <div className="flex-1 p-2">
-                <iframe
-                    className={cn("w-full h-full border-0 rounded-md bg-white", className?.iframe)}
-                    srcDoc={renderedHtml}
-                    title="HTML Preview"
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
-                />
+            <div className="relative flex-1 bg-[#090d16] p-2 sm:p-3">
+                {renderedHtml ? (
+                    <iframe
+                        className={cn("w-full h-full border-0 rounded-lg bg-white shadow-inner", className?.iframe)}
+                        srcDoc={renderedHtml}
+                        title="Rendered HTML preview"
+                        sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
+                    />
+                ) : (
+                    <div className="flex h-full min-h-72 flex-col items-center justify-center rounded-lg border border-dashed border-white/10 bg-white/[0.02] px-6 text-center">
+                        <Play className="mb-3 size-8 text-slate-600" />
+                        <div className="font-medium text-slate-300">
+                            Your preview will appear here
+                        </div>
+                        <p className="mt-1 max-w-sm text-sm text-slate-500">
+                            Run the template or begin editing to start live
+                            rendering.
+                        </p>
+                    </div>
+                )}
             </div>
-        </div>
-    )
-} 
+        </section>
+    );
+};

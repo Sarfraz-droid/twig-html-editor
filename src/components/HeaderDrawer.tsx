@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Drawer,
     DrawerContent,
@@ -11,6 +10,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useStore } from "@/store/store";
 import { MonacoEditorComponent } from "./MonacoEditorComponent";
+import { FileCog } from "lucide-react";
 
 export const HeaderDrawer = () => {
     const { htmlHead, setHtmlHead } = useStore();
@@ -21,17 +21,20 @@ export const HeaderDrawer = () => {
 
     return (
         <Drawer shouldScaleBackground={true}>
-            <DrawerTrigger>
-                <Button variant={"outline"}>📄 HTML Head</Button>
+            <DrawerTrigger asChild>
+                <Button variant="outline" size="sm" title="Edit HTML head">
+                    <FileCog className="size-4" />
+                    <span className="hidden lg:inline">HTML Head</span>
+                </Button>
             </DrawerTrigger>
-            <DrawerContent className="h-[100vh] min-h-[600px]">
+            <DrawerContent className="h-[92dvh]">
                 <DrawerHeader>
                     <DrawerTitle>Edit HTML Head Elements</DrawerTitle>
                 </DrawerHeader>
                 <DrawerDescription className="px-4 h-full pb-4 flex flex-col">
-                    <div className="w-full flex flex-1 gap-6">
+                    <div className="flex w-full flex-1 flex-col gap-6 overflow-y-auto lg:flex-row">
                         {/* Form Section */}
-                        <div className="w-1/2 flex flex-col gap-4">
+                        <div className="flex w-full flex-col gap-4 lg:w-1/2">
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-medium text-white">Page Title</label>
                                 <Input
@@ -117,7 +120,7 @@ export const HeaderDrawer = () => {
                         </div>
 
                         {/* Custom Head Content Editor */}
-                        <div className="w-1/2 flex flex-col gap-2">
+                        <div className="flex min-h-80 w-full flex-col gap-2 lg:w-1/2">
                             <label className="text-sm font-medium text-white">Custom Head Content</label>
                             <div className="flex-1">
                                 <MonacoEditorComponent
@@ -138,4 +141,4 @@ export const HeaderDrawer = () => {
             </DrawerContent>
         </Drawer>
     );
-}; 
+};

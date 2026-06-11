@@ -1,6 +1,5 @@
 // import Editor from '@monaco-editor/react';
 import { cn } from "@/lib/utils";
-import { motion } from "motion/react";
 import { editor, KeyCode, KeyMod } from "monaco-editor";
 import { useResizeObserver } from "@mantine/hooks";
 import { useEffect, useRef } from "react";
@@ -21,6 +20,7 @@ type MonacoEditorComponentProps = {
     };
 
     isOpen: boolean;
+    hideHeader?: boolean;
 };
 
 
@@ -33,25 +33,40 @@ export const MonacoEditorComponent = ({
     onChange,
     onRun,
     className,
-    isOpen
+    isOpen,
+    hideHeader = false
 }: MonacoEditorComponentProps) => {
     const [editorContainerRef] = useResizeObserver();
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+    const onRunRef = useRef(onRun);
+    const initialValueRef = useRef(value);
 
-    const debouncedOnChange = useDebouncedCallback(onChange, 1000);
+    const debouncedOnChange = useDebouncedCallback(onChange, 250);
+    onRunRef.current = onRun;
 
     useEffect(() => {
         if (editorContainerRef.current) {
             editorContainerRef.current.innerHTML = "";
             editorRef.current = editor.create(editorContainerRef.current, {
                 language,
-                value,
+                value: initialValueRef.current,
                 theme: "vs-dark",
                 minimap: {
                     enabled: false
-                }
+                },
+                automaticLayout: true,
+                fontSize: 13,
+                lineHeight: 21,
+                padding: { top: 14, bottom: 14 },
+                scrollBeyondLastLine: false,
+                wordWrap: "on",
+                renderLineHighlight: "gutter",
+                overviewRulerBorder: false
             });
-
+            editorRef.current.addCommand(
+                KeyMod.CtrlCmd | KeyCode.Enter,
+                () => onRunRef.current?.()
+            );
         }
 
         return () => {
@@ -59,33 +74,19 @@ export const MonacoEditorComponent = ({
                 editorRef.current.dispose();
             }
         };
-    }, []);
-
-    // Keep Monaco sized during container transitions
-    useEffect(() => {
-        let raf = 0;
-        const relayout = () => {
-            if (editorRef.current && editorContainerRef.current) {
-                const rect = editorContainerRef.current.getBoundingClientRect();
-                editorRef.current.layout({ height: rect.height, width: rect.width });
-            }
-            raf = requestAnimationFrame(relayout);
-        };
-        raf = requestAnimationFrame(relayout);
-        return () => cancelAnimationFrame(raf);
-    }, [editorContainerRef]);
+    }, [editorContainerRef, language]);
 
     useEffect(() => {
         if (editorRef.current) {
             const model = editorRef.current.getModel() as editor.ITextModel;
             if (model) {
-                model.onDidChangeContent(() => {
-                    console.log("onDidChangeContent", model.getValue());
+                const disposable = model.onDidChangeContent(() => {
                     debouncedOnChange(model.getValue());
                 });
+                return () => disposable.dispose();
             }
         }
-    }, []);
+    }, [debouncedOnChange]);
 
     useEffect(() => {
         if (!editorRef.current) return;
@@ -97,15 +98,13 @@ export const MonacoEditorComponent = ({
     }, [value]);
 
     return (
-        <motion.div
+        <div
             className={cn(
-                "bg-[#1e1e1e] rounded-lg  overflow-hidden flex flex-col h-full",
+                "bg-[#0b101a] overflow-hidden flex flex-col h-full",
                 className?.container
             )}
-            layout
-            transition={{ duration: 0.25, ease: [0.2, 0.65, 0.3, 0.9] }}
         >
-            <div className="p-1">
+            {!hideHeader && <div className="p-1">
                 <div
                     className={cn(
                         "font-semibold text-base p-2 hover:bg-[#151515] bg-[#1e1e1e] rounded-md transition-all duration-300 flex items-center justify-between",
@@ -115,7 +114,7 @@ export const MonacoEditorComponent = ({
                 >
                     <div className="pl-2">{title}</div>
                 </div>
-            </div>
+            </div>}
             <div
                 className={clsx(
                     "transition-[height] duration-300",
@@ -123,6 +122,6 @@ export const MonacoEditorComponent = ({
                 )}
                 ref={editorContainerRef}
             ></div>
-        </motion.div>
+        </div>
     );
 };
