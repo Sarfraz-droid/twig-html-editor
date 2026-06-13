@@ -1,8 +1,19 @@
-import { ExternalLink, LoaderCircle, Play, TriangleAlert } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+    ExternalLink,
+    GripVertical,
+    LoaderCircle,
+    Monitor,
+    Play,
+    Smartphone,
+    TriangleAlert
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTwigService } from "@/hook/useTwigService";
 import { useStore } from "@/store/store";
 import { Button } from "./ui/button";
+
+type PreviewMode = "mobile" | "desktop" | "custom";
 
 type HTMLPreviewProps = {
     htmlContent?: string;
@@ -16,9 +27,68 @@ type HTMLPreviewProps = {
 export const HTMLPreview = ({ className }: HTMLPreviewProps) => {
     const { renderedHtml, renderHtml } = useTwigService();
     const { renderStatus, addConsoleEntry } = useStore();
+    const previewAreaRef = useRef<HTMLDivElement>(null);
+    const [previewMode, setPreviewMode] = useState<PreviewMode>("desktop");
+    const [previewWidth, setPreviewWidth] = useState(390);
+    const [availableWidth, setAvailableWidth] = useState(0);
+
+    useEffect(() => {
+        const previewArea = previewAreaRef.current;
+        if (!previewArea) return;
+
+        const observer = new ResizeObserver(([entry]) => {
+            setAvailableWidth(Math.floor(entry.contentRect.width));
+        });
+        observer.observe(previewArea);
+        return () => observer.disconnect();
+    }, []);
+
+    const selectMobilePreview = () => {
+        setPreviewMode("mobile");
+        setPreviewWidth(Math.min(390, availableWidth || 390));
+    };
+
+    const selectDesktopPreview = () => {
+        setPreviewMode("desktop");
+    };
+
+    const startResize = (event: React.PointerEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        const startX = event.clientX;
+        const startWidth =
+            previewMode === "desktop" ? availableWidth : previewWidth;
+
+        const handlePointerMove = (moveEvent: PointerEvent) => {
+            const nextWidth = Math.min(
+                Math.max(320, startWidth + (moveEvent.clientX - startX) * 2),
+                availableWidth
+            );
+            setPreviewMode("custom");
+            setPreviewWidth(nextWidth);
+        };
+
+        const stopResize = () => {
+            window.removeEventListener("pointermove", handlePointerMove);
+            window.removeEventListener("pointerup", stopResize);
+        };
+
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", stopResize);
+    };
+
+    const resolvedPreviewWidth =
+        previewMode === "desktop"
+            ? availableWidth
+            : Math.min(previewWidth, availableWidth || previewWidth);
 
     const openInPopup = () => {
-        const popup = window.open('', 'htmlPreview', 'width=800,height=600,scrollbars=yes,resizable=yes');
+        const popupWidth =
+            previewMode === "desktop" ? 1200 : Math.round(previewWidth);
+        const popup = window.open(
+            "",
+            "htmlPreview",
+            `width=${popupWidth},height=700,scrollbars=yes,resizable=yes`
+        );
         if (popup) {
             popup.document.write(renderedHtml);
             popup.document.close();
@@ -33,7 +103,7 @@ export const HTMLPreview = ({ className }: HTMLPreviewProps) => {
 
     return (
         <section className={cn("h-full overflow-hidden rounded-xl border border-white/10 bg-[#101521] shadow-2xl shadow-black/20 flex flex-col", className?.container)}>
-            <div className={cn("min-h-12 px-3 flex items-center justify-between gap-3 border-b border-white/10", className?.title)}>
+            <div className={cn("min-h-12 px-3 py-2 flex flex-wrap items-center justify-between gap-2 border-b border-white/10", className?.title)}>
                 <div className="flex min-w-0 items-center gap-2">
                     <div className="font-semibold text-slate-100">
                         Preview
@@ -61,7 +131,51 @@ export const HTMLPreview = ({ className }: HTMLPreviewProps) => {
                         <span className="capitalize">{renderStatus}</span>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                    <div
+                        className="flex rounded-lg bg-black/20 p-1"
+                        role="group"
+                        aria-label="Preview viewport"
+                    >
+                        <button
+                            type="button"
+                            onClick={selectMobilePreview}
+                            className={cn(
+                                "flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500",
+                                previewMode === "mobile"
+                                    ? "bg-slate-700 text-white shadow"
+                                    : "text-slate-400 hover:text-white"
+                            )}
+                            aria-pressed={previewMode === "mobile"}
+                            title="Mobile preview (390px)"
+                        >
+                            <Smartphone className="size-3.5" />
+                            <span className="hidden sm:inline">Mobile</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={selectDesktopPreview}
+                            className={cn(
+                                "flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500",
+                                previewMode === "desktop"
+                                    ? "bg-slate-700 text-white shadow"
+                                    : "text-slate-400 hover:text-white"
+                            )}
+                            aria-pressed={previewMode === "desktop"}
+                            title="Desktop preview"
+                        >
+                            <Monitor className="size-3.5" />
+                            <span className="hidden sm:inline">Desktop</span>
+                        </button>
+                    </div>
+                    <span
+                        className="min-w-12 text-right text-[11px] tabular-nums text-slate-500"
+                        aria-live="polite"
+                    >
+                        {resolvedPreviewWidth
+                            ? `${Math.round(resolvedPreviewWidth)}px`
+                            : "Fit"}
+                    </span>
                     <Button
                         type="button"
                         variant="ghost"
@@ -87,14 +201,31 @@ export const HTMLPreview = ({ className }: HTMLPreviewProps) => {
                     </Button>
                 </div>
             </div>
-            <div className="relative flex-1 bg-[#090d16] p-2 sm:p-3">
+            <div
+                ref={previewAreaRef}
+                className="relative flex min-w-0 flex-1 justify-center overflow-hidden bg-[#090d16] p-2 sm:p-3"
+            >
                 {renderedHtml ? (
-                    <iframe
-                        className={cn("w-full h-full border-0 rounded-lg bg-white shadow-inner", className?.iframe)}
-                        srcDoc={renderedHtml}
-                        title="Rendered HTML preview"
-                        sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
-                    />
+                    <div
+                        className="group/preview relative h-full max-w-full shrink-0 transition-[width] duration-200 ease-out"
+                        style={{ width: resolvedPreviewWidth || "100%" }}
+                    >
+                        <iframe
+                            className={cn("h-full w-full border-0 rounded-lg bg-white shadow-inner", className?.iframe)}
+                            srcDoc={renderedHtml}
+                            title={`Rendered HTML preview at ${Math.round(resolvedPreviewWidth)} pixels wide`}
+                            sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
+                        />
+                        <button
+                            type="button"
+                            onPointerDown={startResize}
+                            className="absolute right-0 top-1/2 z-10 flex h-16 w-5 -translate-y-1/2 translate-x-1/2 touch-none items-center justify-center rounded-full border border-white/15 bg-slate-800 text-slate-400 opacity-60 shadow-lg transition-opacity hover:bg-slate-700 hover:text-white hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-sky-500 group-hover/preview:opacity-100"
+                            aria-label="Resize preview width"
+                            title="Drag to resize preview"
+                        >
+                            <GripVertical className="size-3.5" />
+                        </button>
+                    </div>
                 ) : (
                     <div className="flex h-full min-h-72 flex-col items-center justify-center rounded-lg border border-dashed border-white/10 bg-white/[0.02] px-6 text-center">
                         <Play className="mb-3 size-8 text-slate-600" />
